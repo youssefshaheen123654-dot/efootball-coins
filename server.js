@@ -4,10 +4,8 @@ const db = require('./db');
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
-
-app.get('/', (req, res) => res.sendFile(__dirname + '/public/index.html'));
-
+app.use(express.static(__dirname)); // يخدم الملفات من الجذر
+app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 const ADMIN_SECRET = "123@@@456";
 
 // --- 1. صفحة المنشئ السرية ---
