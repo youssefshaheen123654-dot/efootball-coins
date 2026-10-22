@@ -11,7 +11,7 @@ const ADMIN_SECRET = "123@@@456";
 // --- 1. صفحة المنشئ السرية ---
 app.get('/admin-secret', (req, res) => {
   if (req.query.key === ADMIN_SECRET) {
-    res.sendFile(__dirname + '/public/admin.html');
+    res.sendFile(__dirname + '/admin.html');
   } else {
     res.status(403).send('<h1 style="text-align:center; margin-top:50px; font-family:Arial;">🚫 ممنوع الدخول</h1>');
   }
